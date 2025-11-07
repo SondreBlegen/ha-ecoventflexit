@@ -10,7 +10,6 @@ from homeassistant.const import (
     CONF_PASSWORD,
 )
 
-# Assume ecoventv2 is a local file within the custom component
 from ecoventv2 import Fan
 from .const import DOMAIN, CONF_FAN_ID
 
@@ -33,13 +32,10 @@ class EcoventFlexitConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
             password = user_input[CONF_PASSWORD]
             name = user_input.get(CONF_NAME, f"Ecovent Flexit ({ip_address})")
 
-            # Set unique_id early to check for existing entries
             await self.async_set_unique_id(fan_id)
             self._abort_if_unique_id_configured()
 
-            # Validate if the device can be connected using the provided credentials
             try:
-                # Use hass.async_add_executor_job for blocking I/O (from ecoventv2 library)
                 await self.hass.async_add_executor_job(
                     self._test_connection, ip_address, port, fan_id, password, name
                 )
@@ -64,25 +60,6 @@ class EcoventFlexitConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
     def _test_connection(self, ip_address, port, fan_id, password, name):
         """Test if we can connect to the Ecovent Flexit fan (blocking call)."""
         fan = Fan(host=ip_address, password=password, fan_id=fan_id, port=port, name=name)
-        fan.update() # Attempt to update to check connection and credentials
-        # If no exception, connection is successful
+        fan.update()
         _LOGGER.debug("Test connection to Ecovent Flexit successful for %s.", fan_id)
 
-    @callback
-    def async_get_options_flow(self, config_entry):
-        """Get the options flow for this handler."""
-        # This integration does not have options for now, so return a no-op handler
-        return EcoventFlexitOptionsFlowHandler(config_entry)
-
-
-class EcoventFlexitOptionsFlowHandler(config_entries.OptionsFlow):
-    """Handle Ecovent Flexit options."""
-
-    def __init__(self, config_entry):
-        """Initialize Ecovent Flexit options flow."""
-        self.config_entry = config_entry
-
-    async def async_step_init(self, user_input=None):
-        """Manage the options."""
-        # For now, no options are managed via the UI, so just show an empty form or return done
-        return self.async_show_form(step_id="init", data_schema=vol.Schema({}))
