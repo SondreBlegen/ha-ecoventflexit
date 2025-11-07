@@ -65,7 +65,7 @@ SENSOR_TYPES = {
         "firmware",
         "Firmware Version",
         None,
-        SensorDeviceClass.FIRMWARE,
+        None,  # No device class for firmware version
         None,
         "mdi:chip",
         lambda value: value
