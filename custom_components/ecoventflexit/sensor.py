@@ -88,24 +88,6 @@ SENSOR_TYPES = {
         "mdi:ip-network",
         lambda value: value
     ),
-    "humidity_threshold": (
-        "humidity_treshold", # Note: Typo in library - 'treshold' not 'threshold'
-        "Humidity Threshold",
-        PERCENTAGE,
-        SensorDeviceClass.HUMIDITY,
-        None,
-        "mdi:water-percent-alert",
-        lambda value: value
-    ),
-    "analogv_threshold": (
-        "analogV_treshold", # Note: Typo in library - 'treshold' not 'threshold'
-        "Analog Voltage Threshold",
-        PERCENTAGE,
-        None,
-        None,
-        "mdi:tune",
-        lambda value: value
-    ),
     "analogv_value": (
         "analogV",
         "Analog Voltage",
@@ -114,33 +96,6 @@ SENSOR_TYPES = {
         SensorStateClass.MEASUREMENT,
         "mdi:sine-wave",
         lambda value: value
-    ),
-    "boost_time": (
-        "boost_time",
-        "Boost Time",
-        UnitOfTime.MINUTES,
-        SensorDeviceClass.DURATION,
-        None,
-        "mdi:timer-outline",
-        lambda value: int(value.split(' ')[0]) if isinstance(value, str) and 'm' in value else None # "30 m" -> 30
-    ),
-    "night_mode_timer": (
-        "night_mode_timer",
-        "Night Mode Timer",
-        UnitOfTime.HOURS,
-        SensorDeviceClass.DURATION,
-        None,
-        "mdi:weather-night",
-        lambda value: int(value.split('h')[0]) if isinstance(value, str) and 'h' in value else None # "08h 00m" -> 8
-    ),
-    "party_mode_timer": (
-        "party_mode_timer",
-        "Party Mode Timer",
-        UnitOfTime.HOURS,
-        SensorDeviceClass.DURATION,
-        None,
-        "mdi:party-popper",
-        lambda value: int(value.split('h')[0]) if isinstance(value, str) and 'h' in value else None # "04h 00m" -> 4
     ),
     "timer_counter": (
         "timer_counter",

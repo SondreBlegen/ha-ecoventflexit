@@ -46,6 +46,28 @@ NUMBER_TYPES = {
         NumberDeviceClass.DURATION,
         "mdi:timer-outline"
     ),
+    "night_mode_duration": (
+        "night_mode_timer",
+        770,
+        "Night Mode Duration",
+        1,
+        720,  # Up to 12 hours in minutes
+        30,  # 30 minute increments
+        UnitOfTime.MINUTES,
+        NumberDeviceClass.DURATION,
+        "mdi:weather-night"
+    ),
+    "party_mode_duration": (
+        "party_mode_timer",
+        771,
+        "Party Mode Duration",
+        1,
+        720,  # Up to 12 hours in minutes
+        30,  # 30 minute increments
+        UnitOfTime.MINUTES,
+        NumberDeviceClass.DURATION,
+        "mdi:party-popper"
+    ),
 }
 
 
@@ -142,11 +164,19 @@ class EcoventFlexitNumber(NumberEntity):
         if raw_value is not None:
             # Parse the value if it's a string with units
             if isinstance(raw_value, str):
-                # Extract numeric value from strings like "30 m" or "70"
                 try:
-                    self._attr_native_value = float(raw_value.split()[0])
-                except (ValueError, IndexError):
-                    _LOGGER.warning("Could not parse numeric value from %s", raw_value)
+                    # Handle time formats like "08h 00m" or "30 m"
+                    if 'h' in raw_value and 'm' in raw_value:
+                        # Format: "08h 00m" - convert to total minutes
+                        parts = raw_value.replace('h', '').replace('m', '').split()
+                        hours = int(parts[0]) if len(parts) > 0 else 0
+                        minutes = int(parts[1]) if len(parts) > 1 else 0
+                        self._attr_native_value = float(hours * 60 + minutes)
+                    else:
+                        # Simple format like "30 m" or just a number
+                        self._attr_native_value = float(raw_value.split()[0])
+                except (ValueError, IndexError) as e:
+                    _LOGGER.warning("Could not parse numeric value from %s: %s", raw_value, e)
                     self._attr_native_value = None
             else:
                 self._attr_native_value = float(raw_value)

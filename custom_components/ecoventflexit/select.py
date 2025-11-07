@@ -81,15 +81,19 @@ class EcoventFlexitTimerModeSelect(SelectEntity):
 
     async def async_update(self) -> None:
         """Fetch new state data for the select entity."""
-        # The main fan object's update method is called by the Fan entity already
-        # We just need to read the updated attribute from the shared fan object
         _LOGGER.debug("Updating timer mode select for fan %s", self._fan.name)
-        # Assuming the pyEcoventV2 library has a public attribute `timer_mode` after `_fan.update()`
-        # Or, we fetch it directly if the library doesn't expose it as a direct attribute
-        # For simplicity, let's assume `_fan.params[7]` is updated and we can get the string value
-        raw_timer_mode_value = self._fan.get_param(7) # This would directly query, better to read from _fan.timer_mode if it exists
-        if raw_timer_mode_value is not None:
-            self._attr_current_option = TIMER_MODES.get(raw_timer_mode_value)
+        
+        # Try to read from timer_mode attribute first (it's a string like "off", "night", "party")
+        timer_mode_str = getattr(self._fan, 'timer_mode', None)
+        
+        if timer_mode_str is not None and timer_mode_str in self._attr_options:
+            # The attribute already gives us the string value
+            self._attr_current_option = timer_mode_str
         else:
-            self._attr_current_option = None
-            _LOGGER.debug("Raw timer mode value for fan %s was None", self._fan.name)
+            # Fallback: read from param and convert integer to string
+            raw_timer_mode_value = self._fan.get_param(7)
+            if raw_timer_mode_value is not None:
+                self._attr_current_option = TIMER_MODES.get(raw_timer_mode_value)
+            else:
+                self._attr_current_option = None
+                _LOGGER.debug("Raw timer mode value for fan %s was None", self._fan.name)
