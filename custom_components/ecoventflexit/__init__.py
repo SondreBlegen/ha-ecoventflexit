@@ -70,7 +70,7 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     hass.data[DOMAIN][ECOVENT_DEVICES].append(ecovent_fan_instance)
 
     # Forward the setup to the fan platform (fan.py)
-    await hass.config_entries.async_forward_entry_setups(entry, Platform.FAN)
+    await hass.config_entries.async_forward_entry_setups(entry, [Platform.FAN])
 
     # Register the custom service `ecoventflexit.set_airflow`
     async def async_set_airflow_service(call):
@@ -108,7 +108,7 @@ async def async_unload_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     _LOGGER.debug("Unloading Ecovent Flexit config entry: %s", entry.entry_id)
 
     # Unload the fan platform first
-    unload_ok = await hass.config_entries.async_forward_entry_unload(entry, Platform.FAN)
+    unload_ok = await hass.config_entries.async_forward_entry_unload(entry, [Platform.FAN])
 
     if unload_ok:
         # Clean up the stored device instance(s)
