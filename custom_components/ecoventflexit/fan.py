@@ -4,12 +4,8 @@ import math
 from homeassistant.components.fan import (
     FanEntityFeature,
     FanEntity,
-    SPEED_OFF,
-    SPEED_LOW,
-    SPEED_MEDIUM,
-    SPEED_HIGH,
 )
-from homeassistant.const import STATE_ON, STATE_OFF
+from homeassistant.const import STATE_ON, STATE_OFF # STATE_ON/OFF are standard, keep these
 from homeassistant.core import HomeAssistant
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
@@ -19,7 +15,7 @@ from homeassistant.util.percentage import (
 )
 from homeassistant.helpers.event import async_track_time_interval
 
-# Assume ecoventv2 is a local file within the custom component
+# --- CHANGED: Import Fan from the installed pyEcoventV2 library ---
 from ecoventv2 import Fan
 from .const import DOMAIN, ECOVENT_DEVICES, SERVICE_SET_AIRFLOW, AIRFLOW_MODES, SCAN_INTERVAL
 
@@ -31,7 +27,9 @@ ATTR_FAN_ID_EXPOSED = "device_id" # To expose the fan ID as an attribute, differ
 
 # Ordered list of speeds, excluding 'off' for percentage calculation
 # This aligns with Home Assistant's fan percentage helper.
-ORDERED_FAN_SPEEDS = [SPEED_LOW, SPEED_MEDIUM, SPEED_HIGH]
+# These are just for internal logic and percentage mapping, not direct imports.
+# The fan's actual string speeds come from self._fan.params
+ORDERED_FAN_SPEEDS = ["low", "medium", "high"] # Defined locally as strings
 # Speed range mapping from percentage to the fan's internal integer speed levels (1, 2, 3)
 SPEED_RANGE = (1, 3) # Corresponds to low (1), medium (2), high (3) in the fan's protocol
 
@@ -49,7 +47,6 @@ async def async_setup_entry(
     entities = []
     for ecovent_fan_instance in ecovent_fan_instances:
         # Check if this instance belongs to the current config_entry
-        # (This handles cases where multiple entries might call setup or on reload)
         if ecovent_fan_instance.host == config_entry.data.get('ip_address') and \
            ecovent_fan_instance.id == config_entry.data.get(CONF_FAN_ID):
             entities.append(EcoventFlexitFan(ecovent_fan_instance))
@@ -75,11 +72,12 @@ class EcoventFlexitFan(FanEntity):
 
         # Initial state will be fetched during async_add_entities with update_before_add=True
         # These will be populated by async_update
-        self._current_speed_level = None # Raw integer speed from fan
+        self._current_speed_level = None # Raw integer speed from fan (0-3)
         self._current_state_bool = None # True/False for on/off
         self._current_airflow_mode = None # String airflow mode from fan
 
         # Store mappings from the fan library for easy access
+        # Ensure that self._fan.params is populated by the library during its init/update
         self._states_map = self._fan.params.get(1, [None, {}])[1]
         self._speeds_map = self._fan.params.get(2, [None, {}])[1]
         self._airflows_map = self._fan.params.get(183, [None, {}])[1]
@@ -89,7 +87,7 @@ class EcoventFlexitFan(FanEntity):
     @property
     def should_poll(self) -> bool:
         """Return True if entity should be polled for state updates."""
-        return True # The ecoventv2 library does not use callbacks, so we must poll
+        return True # The pyEcoventV2 library does not use callbacks, so we must poll
 
     @property
     def percentage(self) -> int | None:
@@ -106,9 +104,8 @@ class EcoventFlexitFan(FanEntity):
     @property
     def supported_features(self) -> FanEntityFeature:
         """Return supported features."""
-        # If you want to use airflow modes as Home Assistant preset modes,
-        # add FanEntityFeature.PRESET_MODE. You would also need to implement
-        # `preset_mode` and `set_preset_mode`. For simplicity now, just SET_SPEED.
+        # Add FanEntityFeature.PRESET_MODE if you want to expose airflow modes as HA preset modes.
+        # This would require implementing `preset_mode` and `set_preset_mode` properties/methods.
         return FanEntityFeature.SET_SPEED
 
     @property
