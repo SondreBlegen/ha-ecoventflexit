@@ -1,0 +1,25 @@
+# Services for Ecovent Flexit integration
+set_airflow:
+  name: Set Airflow Mode
+  description: Set the airflow mode of the Ecovent Flexit fan
+  fields:
+    entity_id:
+      name: Entity
+      description: The Ecovent Flexit fan entity
+      required: true
+      example: "fan.theodor_fan"
+      selector:
+        entity:
+          integration: ecoventflexit
+          domain: fan
+    airflow_mode:
+      name: Airflow Mode
+      description: The airflow mode to set
+      required: true
+      example: "heat_recovery"
+      selector:
+        select:
+          options:
+            - "ventilation"
+            - "heat_recovery"
+            - "air_supply"

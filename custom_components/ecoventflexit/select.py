@@ -73,7 +73,7 @@ class EcoventFlexitTimerModeSelect(SelectEntity):
                 await self.hass.async_add_executor_job(self._fan.set_param, 7, int_value)
                 self._attr_current_option = option
                 self.async_write_ha_state() # Update HA state immediately
-                await self.async_update() # Then do a full update
+                # Don't call async_update() immediately - let the next poll cycle handle it
             except Exception as e:
                 _LOGGER.error("Error setting timer mode for Ecovent Flexit fan %s: %s", self._fan.name, e, exc_info=True)
         else:

@@ -88,7 +88,7 @@ class EcoventFlexitSwitch(SwitchEntity):
             await self.hass.async_add_executor_job(self._fan.set_param, self._param_id, 1)
             self._attr_is_on = True
             self.async_write_ha_state()
-            await self.async_update()
+            # Don't call async_update() immediately - let the next poll cycle handle it
         except Exception as e:
             _LOGGER.error("Error turning on switch %s for Ecovent Flexit fan %s: %s", self._attr_name, self._fan.name, e, exc_info=True)
 
@@ -100,7 +100,7 @@ class EcoventFlexitSwitch(SwitchEntity):
             await self.hass.async_add_executor_job(self._fan.set_param, self._param_id, 0)
             self._attr_is_on = False
             self.async_write_ha_state()
-            await self.async_update()
+            # Don't call async_update() immediately - let the next poll cycle handle it
         except Exception as e:
             _LOGGER.error("Error turning off switch %s for Ecovent Flexit fan %s: %s", self._attr_name, self._fan.name, e, exc_info=True)
 
