@@ -52,50 +52,23 @@ SENSOR_TYPES = {
         "mdi:fan",
         lambda value: value
     ),
-    "battery_voltage": (
-        "battery_voltage",
-        "Battery Voltage",
-        UnitOfElectricPotential.MILLIVOLT,
-        SensorDeviceClass.VOLTAGE,
-        SensorStateClass.MEASUREMENT,
-        "mdi:battery-voltage",
-        lambda value: int(value.split(' ')[0]) if isinstance(value, str) and 'mV' in value else None # "3075 mV" -> 3075
-    ),
-    "firmware": (
-        "firmware",
-        "Firmware Version",
-        None,
-        None,  # No device class for firmware version
-        None,
-        "mdi:chip",
-        lambda value: value
-    ),
     "filter_timer_countdown": (
         "filter_timer_countdown",
         "Filter Countdown",
-        UnitOfTime.DAYS, # Assuming the library converts to days, or we parse "77d 23h 17m"
+        UnitOfTime.DAYS,
         SensorDeviceClass.DURATION,
         SensorStateClass.MEASUREMENT,
         "mdi:filter-menu",
-        lambda value: int(value.split('d')[0]) if isinstance(value, str) and 'd' in value else None # "77d 23h 17m" -> 77
+        lambda value: int(value.split('d')[0]) if isinstance(value, str) and 'd' in value else None # "77d 11h 21m" -> 77
     ),
     "machine_hours": (
         "machine_hours",
         "Machine Hours",
-        UnitOfTime.HOURS, # Assuming parsing from "219d 8h 57m"
+        UnitOfTime.DAYS,
         SensorDeviceClass.DURATION,
-        SensorStateClass.TOTAL_INCREASING, # Total, increasing over time
-        "mdi:hours-24",
-        lambda value: sum(int(x.strip('hmsd')) for x in value.split() if x[-1] in 'hmsd') # Simple sum for demonstration, needs better parsing
-    ),
-    "alarm_status": (
-        "alarm_status",
-        "Alarm Status",
-        None,
-        None,
-        None,
-        "mdi:bell-alert",
-        lambda value: value
+        SensorStateClass.TOTAL_INCREASING,
+        "mdi:clock-outline",
+        lambda value: int(value.split('d')[0]) if isinstance(value, str) and 'd' in value else None # "219d 20h 53m" -> 219
     ),
     "unit_type": (
         "unit_type",
@@ -103,20 +76,81 @@ SENSOR_TYPES = {
         None,
         None,
         None,
-        "mdi:air-filter",
+        "mdi:information-outline",
         lambda value: value
     ),
     "current_wifi_ip": (
-        "curent_wifi_ip", # Note: corrected typo from `curent_wifi_ip` to `current_wifi_ip` in `pyEcoventV2` if needed, otherwise use `curent_wifi_ip`
-        "Current WiFi IP",
+        "curent_wifi_ip", # Note: Typo in library API - it's 'curent_wifi_ip' not 'current_wifi_ip'
+        "WiFi IP Address",
         None,
-        None, # SensorDeviceClass.IP_ADDRESS could be a thing, but not standard
+        None,
         None,
         "mdi:ip-network",
         lambda value: value
     ),
-    # Add other sensors as desired, e.g., temperatures if exposed by the library
-    # "inlet_temperature": ("inlet_temp", "Inlet Temperature", UnitOfTemperature.CELSIUS, SensorDeviceClass.TEMPERATURE, SensorStateClass.MEASUREMENT, "mdi:thermometer", lambda value: value),
+    "humidity_threshold": (
+        "humidity_treshold", # Note: Typo in library - 'treshold' not 'threshold'
+        "Humidity Threshold",
+        PERCENTAGE,
+        SensorDeviceClass.HUMIDITY,
+        None,
+        "mdi:water-percent-alert",
+        lambda value: value
+    ),
+    "analogv_threshold": (
+        "analogV_treshold", # Note: Typo in library - 'treshold' not 'threshold'
+        "Analog Voltage Threshold",
+        PERCENTAGE,
+        None,
+        None,
+        "mdi:tune",
+        lambda value: value
+    ),
+    "analogv_value": (
+        "analogV",
+        "Analog Voltage",
+        PERCENTAGE,
+        None,
+        SensorStateClass.MEASUREMENT,
+        "mdi:sine-wave",
+        lambda value: value
+    ),
+    "boost_time": (
+        "boost_time",
+        "Boost Time",
+        UnitOfTime.MINUTES,
+        SensorDeviceClass.DURATION,
+        None,
+        "mdi:timer-outline",
+        lambda value: int(value.split(' ')[0]) if isinstance(value, str) and 'm' in value else None # "30 m" -> 30
+    ),
+    "night_mode_timer": (
+        "night_mode_timer",
+        "Night Mode Timer",
+        UnitOfTime.HOURS,
+        SensorDeviceClass.DURATION,
+        None,
+        "mdi:weather-night",
+        lambda value: int(value.split('h')[0]) if isinstance(value, str) and 'h' in value else None # "08h 00m" -> 8
+    ),
+    "party_mode_timer": (
+        "party_mode_timer",
+        "Party Mode Timer",
+        UnitOfTime.HOURS,
+        SensorDeviceClass.DURATION,
+        None,
+        "mdi:party-popper",
+        lambda value: int(value.split('h')[0]) if isinstance(value, str) and 'h' in value else None # "04h 00m" -> 4
+    ),
+    "timer_counter": (
+        "timer_counter",
+        "Timer Counter",
+        None,
+        None,
+        None,
+        "mdi:timer",
+        lambda value: value  # Keep as string "0h 0m 0s"
+    ),
 }
 
 

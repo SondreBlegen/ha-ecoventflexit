@@ -109,15 +109,6 @@ class EcoventFlexitFan(FanEntity):
             ATTR_FAN_ID_EXPOSED: self._fan.id,
             "ip_address": self._fan.host,
             "port": self._fan.port,
-            "fan1_speed_rpm": getattr(self._fan, 'fan1_speed', None),
-            "fan2_speed_rpm": getattr(self._fan, 'fan2_speed', None),
-            "humidity": getattr(self._fan, 'humidity', None),
-            "unit_type": getattr(self._fan, 'unit_type', None),
-            "battery_voltage": getattr(self._fan, 'battery_voltage', None),
-            "firmware": getattr(self._fan, 'firmware', None),
-            "filter_timer_countdown": getattr(self._fan, 'filter_timer_countdown', None),
-            "machine_hours": getattr(self._fan, 'machine_hours', None),
-            "alarm_status": getattr(self._fan, 'alarm_status', None),
         }
         return {k: v for k, v in attrs.items() if v is not None}
 

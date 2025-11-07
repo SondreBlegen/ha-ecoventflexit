@@ -15,9 +15,10 @@ _LOGGER = logging.getLogger(__name__)
 SWITCH_TYPES = {
     "heater": ("heater_status", 129, "Heater", "mdi:heating-coil"),
     "boost": ("boost_status", 6, "Boost", "mdi:rocket-launch-outline"),
-    # Add other binary controllable attributes here if available (e.g., humidity_sensor_state, 15)
     "humidity_sensor": ("humidity_sensor_state", 15, "Humidity Sensor Auto", "mdi:water-thermometer"),
-    "cloud_server": ("cloud_server_state", 133, "Cloud Server", "mdi:cloud")
+    "relay_sensor": ("relay_sensor_state", 20, "Relay Sensor", "mdi:electric-switch"),
+    "analogv_sensor": ("analogV_sensor_state", 22, "Analog Voltage Sensor", "mdi:sine-wave"),
+    "cloud_server": ("cloud_server_state", 133, "Cloud Server", "mdi:cloud"),
 }
 
 async def async_setup_entry(

@@ -24,9 +24,10 @@ SCAN_INTERVAL = timedelta(seconds=10)
 PLATFORMS = [
     Platform.FAN,
     Platform.SENSOR,
+    Platform.BINARY_SENSOR,
     Platform.SELECT,
     Platform.SWITCH,
-    # Add other platforms here if you introduce them (e.g., climate, number)
+    Platform.NUMBER,
 ]
 
 # Fan speed mappings (for clarity, although FanEntity handles percentages)
