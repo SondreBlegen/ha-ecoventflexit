@@ -1,0 +1,18 @@
+{
+    "domain": "ecoventflexit",
+    "name": "Ecovent Flexit Fan",
+    "codeowners": [
+        "@sondreblegen"
+    ],
+    "config_flow": true,
+    "dependencies": [],
+    "requirements": [
+        "pyEcoventV2==0.9.23"
+    ],
+    "issue_tracker": "https://github.com/sondreblegen/ha-ecoventflexit/issues",
+    "version": "1.0.0",
+    "iot_class": [
+        "local_push",
+        "local_polling"
+    ]
+}
