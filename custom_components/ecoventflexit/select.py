@@ -1,4 +1,5 @@
 import logging
+import asyncio
 from typing import Any
 
 from homeassistant.components.select import SelectEntity
@@ -65,15 +66,25 @@ class EcoventFlexitTimerModeSelect(SelectEntity):
 
     async def async_select_option(self, option: str) -> None:
         """Change the selected option."""
-        _LOGGER.debug("Setting timer mode for %s to %s", self._fan.name, option)
+        _LOGGER.info("Setting timer mode for %s to %s (int: %s)", self._fan.name, option, self._timer_modes_inverse.get(option))
         if option in self._timer_modes_inverse:
             int_value = self._timer_modes_inverse[option]
             try:
                 # Parameter ID for timer_mode is 7
                 await self.hass.async_add_executor_job(self._fan.set_param, 7, int_value)
+                _LOGGER.info("Successfully sent timer mode command")
                 self._attr_current_option = option
-                self.async_write_ha_state() # Update HA state immediately
-                # Don't call async_update() immediately - let the next poll cycle handle it
+                self.async_write_ha_state()
+                # Wait a bit for the device to process the command
+                await asyncio.sleep(2)
+                # Force an update to read back the new value
+                await self.hass.async_add_executor_job(self._fan.update)
+                # Read the actual value
+                timer_mode_str = getattr(self._fan, 'timer_mode', None)
+                _LOGGER.info("After update, timer_mode from fan: %s", timer_mode_str)
+                if timer_mode_str and timer_mode_str in self._attr_options:
+                    self._attr_current_option = timer_mode_str
+                    self.async_write_ha_state()
             except Exception as e:
                 _LOGGER.error("Error setting timer mode for Ecovent Flexit fan %s: %s", self._fan.name, e, exc_info=True)
         else:

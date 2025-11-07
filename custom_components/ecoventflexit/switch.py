@@ -1,4 +1,5 @@
 import logging
+import asyncio
 
 from homeassistant.components.switch import SwitchEntity
 from homeassistant.core import HomeAssistant
@@ -82,25 +83,35 @@ class EcoventFlexitSwitch(SwitchEntity):
 
     async def async_turn_on(self, **kwargs) -> None:
         """Turn the switch on."""
-        _LOGGER.debug("Turning on %s for fan %s", self._attr_name, self._fan.name)
+        _LOGGER.info("Turning on %s for fan %s (param_id: %s)", self._attr_name, self._fan.name, self._param_id)
         try:
             # Set param to 1 (which maps to 'on' in the library's internal mapping)
             await self.hass.async_add_executor_job(self._fan.set_param, self._param_id, 1)
+            _LOGGER.info("Successfully sent turn on command")
             self._attr_is_on = True
             self.async_write_ha_state()
-            # Don't call async_update() immediately - let the next poll cycle handle it
+            # Wait a bit for the device to process the command
+            await asyncio.sleep(2)
+            # Verify the state
+            await self.async_update()
+            _LOGGER.info("After update, %s is: %s", self._attr_name, self._attr_is_on)
         except Exception as e:
             _LOGGER.error("Error turning on switch %s for Ecovent Flexit fan %s: %s", self._attr_name, self._fan.name, e, exc_info=True)
 
     async def async_turn_off(self, **kwargs) -> None:
         """Turn the switch off."""
-        _LOGGER.debug("Turning off %s for fan %s", self._attr_name, self._fan.name)
+        _LOGGER.info("Turning off %s for fan %s (param_id: %s)", self._attr_name, self._fan.name, self._param_id)
         try:
             # Set param to 0 (which maps to 'off')
             await self.hass.async_add_executor_job(self._fan.set_param, self._param_id, 0)
+            _LOGGER.info("Successfully sent turn off command")
             self._attr_is_on = False
             self.async_write_ha_state()
-            # Don't call async_update() immediately - let the next poll cycle handle it
+            # Wait a bit for the device to process the command
+            await asyncio.sleep(2)
+            # Verify the state
+            await self.async_update()
+            _LOGGER.info("After update, %s is: %s", self._attr_name, self._attr_is_on)
         except Exception as e:
             _LOGGER.error("Error turning off switch %s for Ecovent Flexit fan %s: %s", self._attr_name, self._fan.name, e, exc_info=True)
 

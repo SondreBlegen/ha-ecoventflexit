@@ -99,8 +99,7 @@ async def async_unload_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     """Unload a config entry."""
     _LOGGER.debug("Unloading Ecovent Flexit config entry: %s", entry.entry_id)
 
-    # --- FIX: Use async_forward_entry_unloads (plural) for unloading a list of platforms ---
-    unload_ok = await hass.config_entries.async_forward_entry_unloads(entry, PLATFORMS)
+    unload_ok = await hass.config_entries.async_forward_entry_unload(entry, PLATFORMS)
 
     if unload_ok:
         if DOMAIN in hass.data and ECOVENT_DEVICES in hass.data[DOMAIN]:

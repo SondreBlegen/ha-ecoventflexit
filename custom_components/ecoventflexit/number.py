@@ -1,4 +1,5 @@
 import logging
+import asyncio
 
 from homeassistant.components.number import NumberEntity, NumberDeviceClass, NumberMode
 from homeassistant.const import PERCENTAGE, UnitOfTime
@@ -145,12 +146,17 @@ class EcoventFlexitNumber(NumberEntity):
 
     async def async_set_native_value(self, value: float) -> None:
         """Set new value."""
-        _LOGGER.debug("Setting %s for fan %s to %s", self._attr_name, self._fan.name, value)
+        _LOGGER.info("Setting %s for fan %s to %s (param_id: %s)", self._attr_name, self._fan.name, value, self._param_id)
         try:
             await self.hass.async_add_executor_job(self._fan.set_param, self._param_id, int(value))
+            _LOGGER.info("Successfully sent command")
             self._attr_native_value = value
             self.async_write_ha_state()
-            # Don't call async_update() immediately - let the next poll cycle handle it
+            # Wait a bit for the device to process the command
+            await asyncio.sleep(2)
+            # Force an update to read back the new value
+            await self.async_update()
+            _LOGGER.info("After update, %s value is: %s", self._attr_name, self._attr_native_value)
         except Exception as e:
             _LOGGER.error("Error setting %s for Ecovent Flexit fan %s: %s", self._attr_name, self._fan.name, e, exc_info=True)
 
