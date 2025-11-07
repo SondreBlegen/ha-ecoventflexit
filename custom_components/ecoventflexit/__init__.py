@@ -70,7 +70,7 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     hass.data[DOMAIN][ECOVENT_DEVICES].append(ecovent_fan_instance)
 
     # Forward the setup to the fan platform (fan.py)
-    await hass.config_entries.async_forward_entry_setup(entry, Platform.FAN)
+    await hass.config_entries.async_forward_entry_setups(entry, Platform.FAN)
 
     # Register the custom service `ecoventflexit.set_airflow`
     async def async_set_airflow_service(call):
