@@ -83,50 +83,37 @@ class EcoventFlexitSwitch(SwitchEntity):
 
     async def async_turn_on(self, **kwargs) -> None:
         """Turn the switch on."""
-        _LOGGER.info("Turning on %s for fan %s (param_id: %s)", self._attr_name, self._fan.name, self._param_id)
+        _LOGGER.info("Turning on %s for fan %s", self._attr_name, self._fan.name)
         try:
-            # Set param to 1 (which maps to 'on' in the library's internal mapping)
-            await self.hass.async_add_executor_job(self._fan.set_param, self._param_id, 1)
+            # set_param expects parameter NAME (string) and VALUE (string)
+            await self.hass.async_add_executor_job(self._fan.set_param, self._attr_name_on_fan, 'on')
             _LOGGER.info("Successfully sent turn on command")
             self._attr_is_on = True
             self.async_write_ha_state()
-            # Wait a bit for the device to process the command
-            await asyncio.sleep(2)
-            # Verify the state
-            await self.async_update()
-            _LOGGER.info("After update, %s is: %s", self._attr_name, self._attr_is_on)
         except Exception as e:
             _LOGGER.error("Error turning on switch %s for Ecovent Flexit fan %s: %s", self._attr_name, self._fan.name, e, exc_info=True)
 
     async def async_turn_off(self, **kwargs) -> None:
         """Turn the switch off."""
-        _LOGGER.info("Turning off %s for fan %s (param_id: %s)", self._attr_name, self._fan.name, self._param_id)
+        _LOGGER.info("Turning off %s for fan %s", self._attr_name, self._fan.name)
         try:
-            # Set param to 0 (which maps to 'off')
-            await self.hass.async_add_executor_job(self._fan.set_param, self._param_id, 0)
+            # set_param expects parameter NAME (string) and VALUE (string)
+            await self.hass.async_add_executor_job(self._fan.set_param, self._attr_name_on_fan, 'off')
             _LOGGER.info("Successfully sent turn off command")
             self._attr_is_on = False
             self.async_write_ha_state()
-            # Wait a bit for the device to process the command
-            await asyncio.sleep(2)
-            # Verify the state
-            await self.async_update()
-            _LOGGER.info("After update, %s is: %s", self._attr_name, self._attr_is_on)
         except Exception as e:
             _LOGGER.error("Error turning off switch %s for Ecovent Flexit fan %s: %s", self._attr_name, self._fan.name, e, exc_info=True)
 
     async def async_update(self) -> None:
         """Fetch new state data for the switch."""
         _LOGGER.debug("Updating switch %s for fan %s", self._attr_name, self._fan.name)
-        # Assuming the pyEcoventV2 library's _fan.update() populates attributes like `heater_status` as strings ('on'/'off')
-        # Or, we fetch it directly if the library doesn't expose it as a direct attribute
-        status_value = self._fan.get_param(self._param_id) # Fetch the raw integer value
+        # Read the status from the attribute (e.g. 'on'/'off')
+        status_value = getattr(self._fan, self._attr_name_on_fan, None)
 
-        # Map integer status (0/1) to boolean (False/True)
         if status_value is not None:
-            # Need to get the mapped string value from the library's internal `params`
-            # For simplicity, assuming 0=off, 1=on directly for switches
-            self._attr_is_on = status_value == 1
+            # Convert string status ('on'/'off') to boolean
+            self._attr_is_on = (status_value == 'on')
         else:
             self._attr_is_on = None
-            _LOGGER.debug("Raw status value for %s (param_id %s) on fan %s was None", self._attr_name, self._param_id, self._fan.name)
+            _LOGGER.debug("Status value for %s on fan %s was None", self._attr_name, self._fan.name)
