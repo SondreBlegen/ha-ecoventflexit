@@ -148,8 +148,22 @@ class EcoventFlexitNumber(NumberEntity):
         """Set new value."""
         _LOGGER.info("Setting %s for fan %s to %s", self._attr_name, self._fan.name, value)
         try:
+            # Convert value based on parameter type
+            if self._number_key in ["night_mode_duration", "party_mode_duration"]:
+                # Timer parameters need special hex encoding: (minutes << 8) | hours
+                total_minutes = int(value)
+                hours = total_minutes // 60
+                minutes = total_minutes % 60
+                # Little-endian format: minutes in high byte, hours in low byte
+                hex_value = hex((minutes * 256) + hours).replace('0x', '').zfill(4)
+                _LOGGER.info("Converting %d minutes to %dh %dm = hex %s", total_minutes, hours, minutes, hex_value)
+                value_to_send = hex_value
+            else:
+                # Regular parameters just need string conversion
+                value_to_send = str(int(value))
+            
             # set_param expects parameter NAME (string) and VALUE (string)!
-            await self.hass.async_add_executor_job(self._fan.set_param, self._attr_name_on_fan, str(int(value)))
+            await self.hass.async_add_executor_job(self._fan.set_param, self._attr_name_on_fan, value_to_send)
             _LOGGER.info("Successfully sent command")
             self._attr_native_value = value
             self.async_write_ha_state()
