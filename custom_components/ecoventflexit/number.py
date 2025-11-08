@@ -53,7 +53,7 @@ NUMBER_TYPES = {
         "Night Mode Duration",
         1,
         720,  # Up to 12 hours in minutes
-        30,  # 30 minute increments
+        10,  # 10 minute increments
         UnitOfTime.MINUTES,
         NumberDeviceClass.DURATION,
         "mdi:weather-night"
@@ -64,7 +64,7 @@ NUMBER_TYPES = {
         "Party Mode Duration",
         1,
         720,  # Up to 12 hours in minutes
-        30,  # 30 minute increments
+        10,  # 10 minute increments
         UnitOfTime.MINUTES,
         NumberDeviceClass.DURATION,
         "mdi:party-popper"
@@ -150,7 +150,7 @@ class EcoventFlexitNumber(NumberEntity):
         try:
             # Convert value based on parameter type
             if self._number_key in ["night_mode_duration", "party_mode_duration"]:
-                # Timer parameters need special hex encoding: (minutes << 8) | hours
+                # Timer parameters need special 4-byte hex encoding: (minutes << 8) | hours
                 total_minutes = int(value)
                 hours = total_minutes // 60
                 minutes = total_minutes % 60
@@ -159,8 +159,10 @@ class EcoventFlexitNumber(NumberEntity):
                 _LOGGER.info("Converting %d minutes to %dh %dm = hex %s", total_minutes, hours, minutes, hex_value)
                 value_to_send = hex_value
             else:
-                # Regular parameters just need string conversion
-                value_to_send = str(int(value))
+                # Regular numeric parameters need 2-character hex (single byte)
+                hex_value = hex(int(value)).replace('0x', '').zfill(2)
+                _LOGGER.info("Converting %d to hex %s", int(value), hex_value)
+                value_to_send = hex_value
             
             # set_param expects parameter NAME (string) and VALUE (string)!
             await self.hass.async_add_executor_job(self._fan.set_param, self._attr_name_on_fan, value_to_send)
